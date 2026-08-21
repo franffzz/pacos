@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#5B1724">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/PacosAppIcon-180.png">
+
+    <title>Categorías — Paco's</title>
+
+    <link rel="stylesheet" href="styles.css?v=7-1">
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <!-- CABECERA -->
+        <header class="app-header">
+
+            <a
+                class="brand-logo"
+                href="index.html"
+                aria-label="Paco's — Ir a Mis recetas"
+            >
+                <img
+                    src="assets/PacosWordmark.png"
+                    alt="Paco's"
+                >
+            </a>
+
+            <div
+                class="recipe-options"
+                id="categories-options"
+            >
+
+                <button
+                    class="options-button"
+                    type="button"
+                    id="categories-options-button"
+                    aria-label="Más opciones"
+                    aria-expanded="false"
+                    aria-controls="categories-options-menu"
+                >
+                    ···
+                </button>
+
+                <div
+                    class="recipe-options-menu"
+                    id="categories-options-menu"
+                    hidden
+                >
+                    <a
+                        class="recipe-options-action"
+                        href="faq.html"
+                    >
+                        Ayuda y preguntas frecuentes
+                    </a>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main
+            class="page-content categories-page"
+            id="categorias"
+        >
+
+            <!-- PRESENTACIÓN -->
+            <section class="page-introduction">
+
+                <h1 class="page-title">
+                    Categorías
+                </h1>
+
+                <p class="page-description">
+                    Explora las recetas por gastronomía,
+                    tipo de plato, ingrediente principal
+                    o sistema de cocción.
+                </p>
+
+            </section>
+
+
+            <!-- BUSCADOR DE CATEGORÍAS -->
+            <section class="search-section">
+
+                <label
+                    class="visually-hidden"
+                    for="buscador-categorias"
+                >
+                    Buscar categorías
+                </label>
+
+                <input
+                    class="search-input"
+                    type="search"
+                    id="buscador-categorias"
+                    name="buscador-categorias"
+                    placeholder="Buscar una categoría"
+                >
+
+            </section>
+
+
+                        <!-- CATEGORÍAS REALES DE LA BIBLIOTECA -->
+            <section
+                class="library-categories-section"
+                aria-labelledby="library-categories-title"
+            >
+
+                <div class="section-heading">
+
+                    <h2
+                        class="section-title"
+                        id="library-categories-title"
+                    >
+                        Tu biblioteca
+                    </h2>
+
+                    <p class="section-description">
+                        Selecciona una categoría para ver
+                        las recetas correspondientes.
+                    </p>
+
+                </div>
+
+
+                <!--
+                    categories.js construye aquí las cuatro
+                    familias a partir de IndexedDB.
+                -->
+                <div
+                    class="categories-container"
+                    id="categories-container"
+                    aria-live="polite"
+                >
+                    <p class="categories-loading">
+                        Cargando categorías…
+                    </p>
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- NAVEGACIÓN PRINCIPAL -->
+        <nav
+            class="bottom-navigation"
+            aria-label="Navegación principal"
+        >
+
+            <a
+                class="navigation-link"
+                href="index.html"
+            >
+                Recetas
+            </a>
+
+            <a
+                class="add-recipe-button"
+                href="editor.html"
+                aria-label="Crear una receta"
+            >
+                +
+            </a>
+
+            <a
+                class="navigation-link active"
+                href="categories.html"
+                aria-current="page"
+            >
+                Categorías
+            </a>
+
+        </nav>
+
+    </div>
+
+
+    <script src="storage.js?v=6-2"></script>
+	<script src="categories.js?v=8-1"></script>
+	<script src="pwa.js?v=8-1"></script>
+
+</body>
+</html>

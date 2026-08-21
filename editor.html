@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#5B1724">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/PacosAppIcon-180.png">
+
+    <title>Nueva receta — Paco's</title>
+
+    <link rel="stylesheet" href="styles.css?v=7-1">
+</head>
+
+<body>
+
+    <div class="editor-shell">
+
+        <!-- CABECERA DEL EDITOR -->
+        <header class="editor-header">
+
+            <a
+                class="back-button editor-close-button"
+                href="index.html"
+                aria-label="Cerrar el editor"
+            >
+                ×
+            </a>
+
+            <h1 class="editor-page-title">
+                Nueva receta
+            </h1>
+
+            <button
+                class="save-recipe-button"
+                type="submit"
+                form="recipe-form"
+            >
+                Guardar
+            </button>
+
+        </header>
+
+
+        <!-- FORMULARIO PRINCIPAL -->
+        <main class="editor-page">
+
+            <form
+                class="recipe-form"
+                id="recipe-form"
+            >
+
+                <!-- INFORMACIÓN BÁSICA -->
+                <section class="editor-section">
+
+                    <h2 class="editor-section-title">
+                        Información básica
+                    </h2>
+
+                    <div class="editor-fields">
+
+                        <label class="editor-field">
+
+                            <span class="editor-field-label">
+                                Nombre de la receta
+                            </span>
+
+                            <input
+                                class="editor-input"
+                                type="text"
+                                id="recipe-title"
+                                name="title"
+                                placeholder="Ej. Bulgogi coreano"
+                                required
+                            >
+
+                        </label>
+
+
+                        <label class="editor-field">
+
+                            <span class="editor-field-label">
+                                Raciones
+                            </span>
+
+                            <input
+                                class="editor-input"
+                                type="number"
+                                id="recipe-servings"
+                                name="servings"
+                                value="2"
+                                min="1"
+                                step="1"
+                                inputmode="numeric"
+                                required
+                            >
+
+                        </label>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CATEGORÍAS -->
+                <section class="editor-section">
+
+                    <h2 class="editor-section-title">
+                        Categorías
+                    </h2>
+
+                    <p class="editor-section-description">
+                        Cada familia es independiente.
+                        Puedes dejar vacía cualquiera de ellas.
+                    </p>
+
+                    <div class="editor-category-fields">
+
+                        <label class="editor-field">
+
+                            <span class="editor-field-label">
+                                Gastronomía
+                            </span>
+
+                            <input
+                                class="editor-input"
+                                type="text"
+                                id="recipe-cuisine"
+                                name="cuisines"
+                                placeholder="Ej. Coreana"
+                            >
+
+                        </label>
+
+
+                        <label class="editor-field">
+
+                            <span class="editor-field-label">
+                                Tipo de plato
+                            </span>
+
+                            <input
+                                class="editor-input"
+                                type="text"
+                                id="recipe-dish-type"
+                                name="dishTypes"
+                                placeholder="Ej. Principal"
+                            >
+
+                        </label>
+
+
+                        <label class="editor-field">
+
+                            <span class="editor-field-label">
+                                Ingrediente principal
+                            </span>
+
+                            <input
+                                class="editor-input"
+                                type="text"
+                                id="recipe-main-ingredient"
+                                name="mainIngredients"
+                                placeholder="Ej. Ternera"
+                            >
+
+                        </label>
+
+
+                        <label class="editor-field">
+
+                            <span class="editor-field-label">
+                                Sistema de cocción
+                            </span>
+
+                            <input
+                                class="editor-input"
+                                type="text"
+                                id="recipe-cooking-method"
+                                name="cookingMethods"
+                                placeholder="Ej. Wok"
+                            >
+
+                        </label>
+
+                    </div>
+
+                </section>
+
+
+                <!-- INGREDIENTES -->
+                <section class="editor-section">
+
+                    <div class="editor-section-heading">
+
+                        <h2 class="editor-section-title">
+                            Ingredientes
+                        </h2>
+
+                        <button
+                            class="editor-add-button"
+                            type="button"
+                            id="add-ingredient-button"
+                        >
+                            + Añadir
+                        </button>
+
+                    </div>
+
+                    <!--
+                        editor.js introducirá aquí
+                        las filas de ingredientes.
+                    -->
+                    <div
+                        class="editor-list"
+                        id="ingredients-editor"
+                    >
+                        <p class="editor-loading">
+                            Preparando ingredientes…
+                        </p>
+                    </div>
+
+                </section>
+
+
+                <!-- PASOS -->
+                <section class="editor-section">
+
+                    <div class="editor-section-heading">
+
+                        <h2 class="editor-section-title">
+                            Preparación
+                        </h2>
+
+                        <button
+                            class="editor-add-button"
+                            type="button"
+                            id="add-step-button"
+                        >
+                            + Añadir
+                        </button>
+
+                    </div>
+
+                    <!--
+                        editor.js introducirá aquí
+                        los pasos de preparación.
+                    -->
+                    <div
+                        class="editor-list"
+                        id="steps-editor"
+                    >
+                        <p class="editor-loading">
+                            Preparando pasos…
+                        </p>
+                    </div>
+
+                </section>
+
+
+                <!-- INFORMACIÓN AUTOMÁTICA -->
+                <p class="editor-automatic-data-note">
+                    Paco’s generará automáticamente el identificador,
+                    la versión del formato y las fechas de creación
+                    y modificación.
+                </p>
+
+            </form>
+
+        </main>
+
+    </div>
+
+
+        <script src="storage.js?v=6-2"></script>
+    <script src="editor.js?v=6-2"></script>
+    <script src="pwa.js?v=8-1"></script>
+
+</body>
+</html>

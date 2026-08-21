@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Adapta la web al ancho de la pantalla del móvil -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Color de la interfaz cuando se abra como aplicación -->
+    <meta name="theme-color" content="#5B1724">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/PacosAppIcon-180.png">
+
+    <title>Paco's — Mis recetas</title>
+
+    <!-- Archivo que contendrá todo el diseño visual -->
+    <link rel="stylesheet" href="styles.css?v=7-1">
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <!-- CABECERA -->
+        <header class="app-header">
+
+           <a
+    class="brand-logo"
+    href="#recetas"
+    aria-label="Paco's — Ir a Mis recetas"
+>
+    <img
+        src="assets/PacosWordmark.png"
+        alt="Paco's"
+    >
+</a>
+
+           <div class="recipe-options">
+
+    <button
+        class="options-button"
+        type="button"
+        id="library-options-button"
+        aria-label="Más opciones"
+        aria-expanded="false"
+        aria-controls="library-options-menu"
+    >
+        ···
+    </button>
+
+    <div
+        class="recipe-options-menu"
+        id="library-options-menu"
+        hidden
+    >
+        <button
+            class="recipe-options-action"
+            type="button"
+            id="open-import-button"
+        >
+            Importar receta
+        </button>
+        
+        <button
+    class="recipe-options-action"
+    type="button"
+    id="export-backup-button"
+>
+    Crear copia de seguridad
+</button>
+        
+        <button
+    class="recipe-options-action"
+    type="button"
+    id="restore-backup-button"
+>
+    Restaurar copia de seguridad
+</button>
+
+<a
+    class="recipe-options-action"
+    href="faq.html"
+>
+    Ayuda y preguntas frecuentes
+</a>
+
+<input
+    type="file"
+    id="restore-backup-file"
+    accept=".json,application/json"
+    hidden
+>
+        
+    </div>
+
+</div>
+
+        </header>
+
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="page-content" id="recetas">
+
+            <!-- PRESENTACIÓN DE LA PANTALLA -->
+            <section class="page-introduction">
+
+                <h1 class="page-title">Mis recetas</h1>
+
+                <p class="page-description">
+                    Busca una receta por su nombre, sus ingredientes
+                    o cualquiera de sus categorías.
+                </p>
+
+            </section>
+
+
+            <!-- BUSCADOR -->
+            <section class="search-section">
+
+                <label
+                    class="visually-hidden"
+                    for="buscador-recetas"
+                >
+                    Buscar recetas
+                </label>
+
+                <input
+                    class="search-input"
+                    type="search"
+                    id="buscador-recetas"
+                    name="buscador-recetas"
+                    placeholder="Título, ingrediente o categoría"
+                >
+
+            </section>
+
+
+            <!-- BIBLIOTECA VACÍA -->
+            <section class="empty-library-card">
+
+               <div class="empty-library-symbol" aria-hidden="true">
+    <img
+        src="assets/PacosAppIcon-1024.png"
+        alt=""
+    >
+</div>
+
+                <h2 class="empty-library-title">
+                    Tu biblioteca está vacía
+                </h2>
+
+                <p class="empty-library-text">
+                    Las recetas que añadas o importes
+                    aparecerán aquí, guardadas en este dispositivo.
+                </p>
+
+              <a
+   				 class="primary-button"
+   				 href="editor.html"
+			>
+    				Crear primera receta
+</a>
+
+            </section>
+
+
+        </main>
+
+
+        <!-- NAVEGACIÓN PRINCIPAL PARA MÓVIL -->
+        <nav
+            class="bottom-navigation"
+            aria-label="Navegación principal"
+        >
+
+            <a
+                class="navigation-link active"
+                href="#recetas"
+            >
+                Recetas
+            </a>
+
+            <a
+                class="add-recipe-button"
+                href="editor.html"
+                aria-label="Crear una receta"
+            >
+                +
+            </a>
+
+            <a
+                class="navigation-link"
+                href="categories.html"
+            >
+                Categorías
+            </a>
+
+        </nav>
+
+    </div>
+    
+    <!-- CUADRO DE IMPORTACIÓN DE RECETAS -->
+<dialog
+    class="import-dialog"
+    id="import-recipe-dialog"
+    aria-labelledby="import-dialog-title"
+>
+
+    <div class="import-dialog-content">
+
+        <header class="import-dialog-header">
+
+            <div>
+
+                <h2
+                    class="import-dialog-title"
+                    id="import-dialog-title"
+                >
+                    Importar receta
+                </h2>
+
+                <p class="import-dialog-description">
+                    Selecciona un archivo JSON o pega directamente
+                    el contenido de una receta.
+                </p>
+
+            </div>
+
+            <button
+                class="import-dialog-close"
+                type="button"
+                id="close-import-button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </header>
+
+
+        <div class="import-file-section">
+
+            <label
+                class="import-file-button"
+                for="import-recipe-file"
+            >
+                Seleccionar archivo JSON
+            </label>
+
+            <input
+                class="visually-hidden"
+                type="file"
+                id="import-recipe-file"
+                accept=".json,application/json"
+            >
+
+            <p
+                class="import-file-name"
+                id="import-file-name"
+            >
+                Ningún archivo seleccionado
+            </p>
+
+        </div>
+
+
+        <div
+            class="import-divider"
+            aria-hidden="true"
+        >
+            <span>o pega el JSON</span>
+        </div>
+
+
+        <label class="import-json-field">
+
+            <span class="import-json-label">
+                Contenido de la receta
+            </span>
+
+            <textarea
+                class="import-json-textarea"
+                id="import-json-text"
+                rows="10"
+                placeholder='{ "format": "pacos-recipe", ... }'
+                spellcheck="false"
+            ></textarea>
+
+        </label>
+
+
+        <p
+            class="import-status"
+            id="import-status"
+            role="status"
+            aria-live="polite"
+        ></p>
+
+
+        <div class="import-dialog-actions">
+
+            <button
+                class="secondary-button"
+                type="button"
+                id="cancel-import-button"
+            >
+                Cancelar
+            </button>
+
+            <button
+                class="primary-button"
+                type="button"
+                id="confirm-import-button"
+            >
+                Importar
+            </button>
+
+        </div>
+
+    </div>
+
+</dialog>
+    
+		<script src="storage.js?v=6-2"></script>
+		<script src="recipe-validator.js?v=6-2"></script>
+		<script src="app.js?v=6-2"></script>
+		<script src="pwa.js?v=8-1"></script>
+
+</body>
+</html>

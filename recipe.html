@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#5B1724">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/PacosAppIcon-180.png">
+
+    <title>Receta — Paco's</title>
+
+    <!-- Reutilizamos el mismo diseño general -->
+    <link rel="stylesheet" href="styles.css?v=7-1">
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <!-- CABECERA DE LA FICHA -->
+        <header class="app-header detail-header">
+
+            <a
+                class="back-button"
+                href="index.html"
+                aria-label="Volver a Mis recetas"
+            >
+                ‹
+            </a>
+
+            <a
+                class="brand-logo"
+                href="index.html"
+                aria-label="Paco's — Ir a Mis recetas"
+            >
+                <img
+                    src="assets/PacosWordmark.png"
+                    alt="Paco's"
+                >
+            </a>
+
+            <div class="recipe-options">
+
+    <button
+        class="options-button"
+        type="button"
+        id="recipe-options-button"
+        aria-label="Más opciones"
+        aria-expanded="false"
+        aria-controls="recipe-options-menu"
+    >
+        ···
+    </button>
+
+    <div
+        class="recipe-options-menu"
+        id="recipe-options-menu"
+        hidden
+    >
+                <button
+            class="recipe-options-action"
+            type="button"
+            id="export-recipe-button"
+        >
+            Exportar receta
+        </button>
+
+        <a
+            class="recipe-options-action"
+            id="edit-recipe-link"
+            href="editor.html"
+            hidden
+        >
+            Editar receta
+        </a>
+
+        <button
+            class="recipe-options-action recipe-options-danger"
+            type="button"
+            id="delete-recipe-button"
+            hidden
+        >
+            Eliminar receta
+        </button>
+        
+    </div>
+
+</div>
+
+        </header>
+
+
+               <!--
+            JavaScript introducirá aquí la receta
+            seleccionada en la biblioteca.
+        -->
+        <main
+            class="recipe-detail-page"
+            id="recipe-detail"
+            aria-live="polite"
+        >
+
+            <p class="recipe-loading">
+                Cargando receta…
+            </p>
+
+        </main>
+
+
+        <!-- NAVEGACIÓN INFERIOR -->
+        <nav
+            class="bottom-navigation"
+            aria-label="Navegación principal"
+        >
+
+            <a
+                class="navigation-link active"
+                href="index.html"
+            >
+                Recetas
+            </a>
+
+            <a
+                class="add-recipe-button"
+                href="editor.html"
+                aria-label="Crear una receta"
+            >
+                +
+            </a>
+
+            <a
+                class="navigation-link"
+                href="categories.html"
+            >
+                Categorías
+            </a>
+
+        </nav>
+
+    </div>
+
+
+    <!-- Funcionamiento específico de la ficha -->
+   <script src="storage.js?v=6-2"></script>
+	<script src="recipe-detail.js?v=6-2"></script>
+	<script src="pwa.js?v=8-1"></script>
+
+</body>
+</html>
