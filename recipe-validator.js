@@ -36,17 +36,6 @@ const PacosRecipeValidator = (function () {
         "scaling"
     ];
 
-    const ALLOWED_UNITS = new Set([
-        "gram",
-        "kilogram",
-        "unit",
-        "clove",
-        "tablespoon",
-        "teaspoon",
-        "cup",
-        "toTaste"
-    ]);
-
     const ALLOWED_SCALING_TYPES = new Set([
         "exact",
         "culinary",
@@ -302,14 +291,10 @@ const PacosRecipeValidator = (function () {
                 }
 
 
-                if (
-                    !ALLOWED_UNITS.has(
-                        ingredient.unit
-                    )
-                ) {
+                if (!isValidUnit(ingredient.unit)) {
 
                     errors.push(
-                        `El ingrediente ${position} utiliza una unidad desconocida.`
+                        `El ingrediente ${position} no contiene una unidad válida.`
                     );
                 }
 
@@ -488,6 +473,26 @@ const PacosRecipeValidator = (function () {
             value !== null &&
             typeof value === "object" &&
             !Array.isArray(value)
+        );
+    }
+
+
+    /*
+       Las unidades dejaron de ser una lista cerrada para que
+       Paco's pueda aceptar cualquier unidad métrica. Las
+       unidades conocidas conservan sus reglas de presentación,
+       mientras que las demás se muestran literalmente.
+    */
+
+    function isValidUnit(value) {
+
+        return (
+            typeof value === "string" &&
+            value === value.trim() &&
+            value.length > 0 &&
+            value.length <= 40 &&
+            value !== "__custom__" &&
+            !/[\u0000-\u001F\u007F]/.test(value)
         );
     }
 

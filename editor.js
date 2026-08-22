@@ -8,6 +8,25 @@
 
 let recetaEnEdicion = null;
 
+const CUSTOM_UNIT_VALUE = "__custom__";
+
+const PREDEFINED_UNITS = new Set([
+    "microgram",
+    "milligram",
+    "gram",
+    "kilogram",
+    "milliliter",
+    "centiliter",
+    "deciliter",
+    "liter",
+    "unit",
+    "clove",
+    "tablespoon",
+    "teaspoon",
+    "cup",
+    "toTaste"
+]);
+
 document.addEventListener(
     "DOMContentLoaded",
     prepararEditor
@@ -269,6 +288,10 @@ function cargarRecetaEnFormulario(receta) {
                 '[data-ingredient-field="unit"]'
             );
 
+            const unidadPersonalizada = fila.querySelector(
+                '[data-ingredient-field="customUnit"]'
+            );
+
             const escalado = fila.querySelector(
                 '[data-ingredient-field="scaling"]'
             );
@@ -293,9 +316,27 @@ function cargarRecetaEnFormulario(receta) {
                 cantidad.value =
                     String(ingrediente.quantity);
 
-                unidad.value =
-                    ingrediente.unit;
+                if (
+                    PREDEFINED_UNITS.has(
+                        ingrediente.unit
+                    )
+                ) {
+
+                    unidad.value = ingrediente.unit;
+
+                } else {
+
+                    unidad.value = CUSTOM_UNIT_VALUE;
+                    unidadPersonalizada.value =
+                        ingrediente.unit;
+                }
             }
+
+
+            adaptarCampoUnidadPersonalizada(
+                unidad,
+                unidadPersonalizada
+            );
 
 
             adaptarCamposAlEscalado(
@@ -407,14 +448,21 @@ function añadirFilaIngrediente() {
     const campoUnidad = crearCampoSeleccion(
         "Unidad",
         [
+            ["microgram", "Microgramos (µg)"],
+            ["milligram", "Miligramos (mg)"],
             ["gram", "Gramos"],
             ["kilogram", "Kilogramos"],
+            ["milliliter", "Mililitros (ml)"],
+            ["centiliter", "Centilitros (cl)"],
+            ["deciliter", "Decilitros (dl)"],
+            ["liter", "Litros (l)"],
             ["unit", "Unidades"],
             ["clove", "Dientes"],
             ["tablespoon", "Cucharadas"],
             ["teaspoon", "Cucharaditas"],
             ["cup", "Tazas"],
-            ["toTaste", "Al gusto"]
+            ["toTaste", "Al gusto"],
+            [CUSTOM_UNIT_VALUE, "Otra unidad métrica…"]
         ]
     );
 
@@ -426,6 +474,25 @@ function añadirFilaIngrediente() {
         campoUnidad.querySelector("select");
 
     unidad.dataset.ingredientField = "unit";
+
+    const unidadPersonalizada =
+        document.createElement("input");
+
+    unidadPersonalizada.className =
+        "editor-input ingredient-custom-unit-input";
+    unidadPersonalizada.type = "text";
+    unidadPersonalizada.placeholder = "Ej. µl, hg o t";
+    unidadPersonalizada.maxLength = 40;
+    unidadPersonalizada.autocapitalize = "none";
+    unidadPersonalizada.spellcheck = false;
+    unidadPersonalizada.hidden = true;
+    unidadPersonalizada.disabled = true;
+    unidadPersonalizada.dataset.ingredientField =
+        "customUnit";
+
+    campoUnidad.appendChild(
+        unidadPersonalizada
+    );
 
 
     /*
@@ -484,6 +551,11 @@ function añadirFilaIngrediente() {
         unidad.addEventListener(
         "change",
         function () {
+
+            adaptarCampoUnidadPersonalizada(
+                unidad,
+                unidadPersonalizada
+            );
 
             if (unidad.value === "toTaste") {
 
@@ -544,6 +616,11 @@ function adaptarCamposAlEscalado(
     const esLibre =
         escalado.value === "free";
 
+    const unidadPersonalizada =
+        unidad.parentElement.querySelector(
+            '[data-ingredient-field="customUnit"]'
+        );
+
 
     if (esLibre) {
 
@@ -553,6 +630,11 @@ function adaptarCamposAlEscalado(
 
         unidad.value = "toTaste";
         unidad.disabled = true;
+
+        adaptarCampoUnidadPersonalizada(
+            unidad,
+            unidadPersonalizada
+        );
 
     } else {
 
@@ -564,7 +646,27 @@ function adaptarCamposAlEscalado(
         if (unidad.value === "toTaste") {
             unidad.value = "gram";
         }
+
+        adaptarCampoUnidadPersonalizada(
+            unidad,
+            unidadPersonalizada
+        );
     }
+}
+
+
+function adaptarCampoUnidadPersonalizada(
+    unidad,
+    unidadPersonalizada
+) {
+
+    const mostrar =
+        !unidad.disabled &&
+        unidad.value === CUSTOM_UNIT_VALUE;
+
+    unidadPersonalizada.hidden = !mostrar;
+    unidadPersonalizada.disabled = !mostrar;
+    unidadPersonalizada.required = mostrar;
 }
 
 
@@ -889,6 +991,10 @@ function construirRecetaDesdeFormulario() {
             '[data-ingredient-field="unit"]'
         );
 
+        const unidadPersonalizada = fila.querySelector(
+            '[data-ingredient-field="customUnit"]'
+        );
+
         const escalado = fila.querySelector(
             '[data-ingredient-field="scaling"]'
         );
@@ -906,7 +1012,10 @@ function construirRecetaDesdeFormulario() {
             unit:
                 escalado.value === "free"
                     ? "toTaste"
-                    : unidad.value,
+                    : unidad.value ===
+                        CUSTOM_UNIT_VALUE
+                        ? unidadPersonalizada.value.trim()
+                        : unidad.value,
 
             scaling: escalado.value
         };

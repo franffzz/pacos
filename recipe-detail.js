@@ -1021,9 +1021,21 @@ function traducirUnidad(
 
     const unidades = {
 
+        microgram: "µg",
+
+        milligram: "mg",
+
         gram: "g",
 
         kilogram: "kg",
+
+        milliliter: "ml",
+
+        centiliter: "cl",
+
+        deciliter: "dl",
+
+        liter: "l",
 
         unit:
             esSingular
