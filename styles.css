@@ -689,7 +689,8 @@ button {
     padding: 26px 22px 30px;
 
     color: white;
-    background-color: var(--color-vino);
+    background-color:
+        var(--recipe-card-color, var(--color-vino));
 
     border-radius: var(--radio-grande);
 
@@ -713,11 +714,64 @@ button {
 
     border:
         30px solid
-        rgba(196, 96, 69, 0.45);
+        var(
+            --recipe-card-accent,
+            rgba(196, 96, 69, 0.45)
+        );
 
     border-radius: 50%;
 
     pointer-events: none;
+}
+
+.recipe-hero[data-card-color="burgundy"] {
+    --recipe-card-color: #4D1023;
+    --recipe-card-accent: rgba(169, 79, 50, 0.68);
+}
+
+.recipe-hero[data-card-color="plum"] {
+    --recipe-card-color: #69294F;
+    --recipe-card-accent: rgba(180, 92, 127, 0.68);
+}
+
+.recipe-hero[data-card-color="brick"] {
+    --recipe-card-color: #8E332B;
+    --recipe-card-accent: rgba(209, 106, 70, 0.7);
+}
+
+.recipe-hero[data-card-color="terracotta"] {
+    --recipe-card-color: #A94F32;
+    --recipe-card-accent: rgba(122, 38, 54, 0.68);
+}
+
+.recipe-hero[data-card-color="ochre"] {
+    --recipe-card-color: #82531F;
+    --recipe-card-accent: rgba(201, 130, 58, 0.7);
+}
+
+.recipe-hero[data-card-color="bottle-green"] {
+    --recipe-card-color: #104D3A;
+    --recipe-card-accent: rgba(44, 138, 109, 0.68);
+}
+
+.recipe-hero[data-card-color="forest-green"] {
+    --recipe-card-color: #296943;
+    --recipe-card-accent: rgba(106, 155, 96, 0.68);
+}
+
+.recipe-hero[data-card-color="dark-turquoise"] {
+    --recipe-card-color: #176B70;
+    --recipe-card-accent: rgba(67, 160, 161, 0.68);
+}
+
+.recipe-hero[data-card-color="medium-blue"] {
+    --recipe-card-color: #315F91;
+    --recipe-card-accent: rgba(103, 138, 180, 0.7);
+}
+
+.recipe-hero[data-card-color="indigo"] {
+    --recipe-card-color: #3A447E;
+    --recipe-card-accent: rgba(119, 118, 181, 0.7);
 }
 
 .recipe-demo-label {

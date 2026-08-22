@@ -8,7 +8,7 @@
 
 
 const CACHE_PREFIX = "pacos-static-";
-const STATIC_CACHE = CACHE_PREFIX + "v11-1";
+const STATIC_CACHE = CACHE_PREFIX + "v11-2";
 
 
 /*
@@ -24,14 +24,14 @@ const CORE_ASSETS = [
     "./recipe.html",
     "./editor.html",
     "./faq.html",
-    "./styles.css?v=11-1",
+    "./styles.css?v=11-2",
     "./card-colors.js?v=11-1",
     "./storage.js?v=11-1",
     "./recipe-validator.js?v=11-1",
     "./app.js?v=11-1",
     "./categories.js?v=8-1",
     "./editor.js?v=9-1",
-    "./recipe-detail.js?v=11-1",
+    "./recipe-detail.js?v=11-2",
     "./pwa.js?v=8-1",
     "./manifest.webmanifest",
     "./assets/PacosWordmark.png",
@@ -77,6 +77,17 @@ self.addEventListener(
                     return cache.addAll(
                         freshRequests
                     );
+                }
+            ).then(
+                function () {
+
+                    /*
+                       La versión recién descargada pasa a estar
+                       disponible sin esperar a que iOS cierre por
+                       completo todos los procesos de la PWA.
+                    */
+
+                    return self.skipWaiting();
                 }
             )
         );
