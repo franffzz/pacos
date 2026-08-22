@@ -8,7 +8,7 @@
 
 
 const CACHE_PREFIX = "pacos-static-";
-const STATIC_CACHE = CACHE_PREFIX + "v8-4";
+const STATIC_CACHE = CACHE_PREFIX + "v9-1";
 
 
 /*
@@ -24,13 +24,13 @@ const CORE_ASSETS = [
     "./recipe.html",
     "./editor.html",
     "./faq.html",
-    "./styles.css?v=7-1",
+    "./styles.css?v=9-1",
     "./storage.js?v=6-2",
-    "./recipe-validator.js?v=6-2",
+    "./recipe-validator.js?v=9-1",
     "./app.js?v=6-2",
     "./categories.js?v=8-1",
-    "./editor.js?v=6-2",
-    "./recipe-detail.js?v=6-2",
+    "./editor.js?v=9-1",
+    "./recipe-detail.js?v=9-1",
     "./pwa.js?v=8-1",
     "./manifest.webmanifest",
     "./assets/PacosWordmark.png",
