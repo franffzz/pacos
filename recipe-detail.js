@@ -54,10 +54,13 @@ async function cargarFichaReceta() {
 
     try {
 
-        const receta =
-            await PacosStorage.getRecipe(
-                recipeId
-            );
+        const resultados = await Promise.all([
+            PacosStorage.getRecipe(recipeId),
+            PacosStorage.getCardColor(recipeId)
+        ]);
+
+        const receta = resultados[0];
+        const preferenciaColor = resultados[1];
 
 
         if (!receta) {
@@ -74,7 +77,10 @@ async function cargarFichaReceta() {
 
         mostrarFichaReceta(
             receta,
-            contenedor
+            contenedor,
+            preferenciaColor
+                ? preferenciaColor.color
+                : PacosCardColors.AUTOMATIC
         );
         
                 prepararEnlaceEdicion(
@@ -221,11 +227,18 @@ function prepararEnlaceEdicion(receta) {
    2. CONSTRUIR LA FICHA COMPLETA
    --------------------------------------------------------- */
 
-function mostrarFichaReceta(receta, contenedor) {
+function mostrarFichaReceta(
+    receta,
+    contenedor,
+    color
+) {
 
     contenedor.replaceChildren();
 
-    const cabecera = crearCabeceraReceta(receta);
+    const cabecera = crearCabeceraReceta(
+        receta,
+        color
+    );
     const contenido = crearContenidoReceta(receta);
 
     contenedor.append(
@@ -239,10 +252,14 @@ function mostrarFichaReceta(receta, contenedor) {
    3. CABECERA DE LA RECETA
    --------------------------------------------------------- */
 
-function crearCabeceraReceta(receta) {
+function crearCabeceraReceta(receta, color) {
 
     const cabecera = document.createElement("section");
     cabecera.className = "recipe-hero";
+
+    if (PacosCardColors.isValidColor(color)) {
+        cabecera.dataset.cardColor = color;
+    }
 
        const etiqueta = crearElemento(
         "p",
@@ -1504,6 +1521,8 @@ async function prepararSelectorColorTarjeta() {
                         );
                     }
 
+                    aplicarColorAFicha(seleccion);
+
                     cerrarDialogo();
 
                 } catch (error) {
@@ -1528,6 +1547,25 @@ async function prepararSelectorColorTarjeta() {
             "No se ha podido preparar el selector de color:",
             error
         );
+    }
+}
+
+
+function aplicarColorAFicha(color) {
+
+    const cabecera = document.querySelector(
+        ".recipe-hero"
+    );
+
+    if (!cabecera) {
+        return;
+    }
+
+    if (PacosCardColors.isValidColor(color)) {
+        cabecera.dataset.cardColor = color;
+
+    } else {
+        delete cabecera.dataset.cardColor;
     }
 }
 
