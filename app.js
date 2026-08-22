@@ -86,8 +86,18 @@ async function cargarBibliotecaGuardada() {
 
     try {
 
-        const recetas =
-            await PacosStorage.getAllRecipes();
+        const resultados = await Promise.all([
+            PacosStorage.getAllRecipes(),
+            PacosStorage.getAllCardColors()
+        ]);
+
+        const recetas = resultados[0];
+
+        const coloresPorReceta = new Map(
+            resultados[1].map(function (preferencia) {
+                return [preferencia.recipeId, preferencia.color];
+            })
+        );
 
 
         /*
@@ -122,7 +132,8 @@ async function cargarBibliotecaGuardada() {
 
         mostrarBibliotecaGuardada(
             recetas,
-            seccionBiblioteca
+            seccionBiblioteca,
+            coloresPorReceta
         );
 
 
@@ -160,7 +171,8 @@ async function cargarBibliotecaGuardada() {
 
 function mostrarBibliotecaGuardada(
     recetas,
-    seccionBiblioteca
+    seccionBiblioteca,
+    coloresPorReceta
 ) {
 
     seccionBiblioteca.replaceChildren();
@@ -202,7 +214,10 @@ function mostrarBibliotecaGuardada(
     recetas.forEach(function (receta) {
 
         const tarjeta =
-            crearTarjetaBiblioteca(receta);
+            crearTarjetaBiblioteca(
+                receta,
+                coloresPorReceta.get(receta.id)
+            );
 
         lista.appendChild(tarjeta);
     });
@@ -261,7 +276,7 @@ function mostrarBibliotecaGuardada(
    7. CREAR UNA TARJETA DE LA BIBLIOTECA
    --------------------------------------------------------- */
 
-function crearTarjetaBiblioteca(receta) {
+function crearTarjetaBiblioteca(receta, color) {
 
     const tarjeta = document.createElement("a");
 
@@ -273,6 +288,10 @@ function crearTarjetaBiblioteca(receta) {
 
     tarjeta.dataset.searchText =
         crearIndiceBusquedaReceta(receta);
+
+    if (PacosCardColors.isValidColor(color)) {
+        tarjeta.dataset.cardColor = color;
+    }
 
     tarjeta.setAttribute(
         "aria-label",
@@ -1300,7 +1319,8 @@ async function crearYDescargarCopiaSeguridad() {
 
     const resultados = await Promise.all([
         PacosStorage.getAllRecipes(),
-        PacosStorage.getAllNotes()
+        PacosStorage.getAllNotes(),
+        PacosStorage.getAllCardColors()
     ]);
 
     const copia = {
@@ -1312,7 +1332,8 @@ async function crearYDescargarCopiaSeguridad() {
             new Date().toISOString(),
 
         recipes: resultados[0],
-        notes: resultados[1]
+        notes: resultados[1],
+        cardColors: resultados[2]
     };
 
 
@@ -1513,12 +1534,16 @@ async function validarArchivoCopiaSeguridad(evento) {
         const numeroNotas =
             copia.notes.length;
 
+        const numeroColores =
+            (copia.cardColors || []).length;
+
 
                 const confirmarRestauracion =
             window.confirm(
                 "La copia de seguridad es válida.\n\n" +
                 `${numeroRecetas} recetas\n` +
-                `${numeroNotas} notas personales\n\n` +
+                `${numeroNotas} notas personales\n` +
+                `${numeroColores} colores personalizados\n\n` +
                 "Si continúas, la biblioteca actual será " +
                 "sustituida completamente por esta copia.\n\n" +
                 "Las recetas que no estén incluidas en el " +
@@ -1536,7 +1561,8 @@ async function validarArchivoCopiaSeguridad(evento) {
 
             await PacosStorage.replaceLibrary(
                 copia.recipes,
-                copia.notes
+                copia.notes,
+                copia.cardColors || []
             );
 
 
@@ -1752,13 +1778,15 @@ async function leerBibliotecaParaFusionar(evento) {
 
         const datosLocales = await Promise.all([
             PacosStorage.getAllRecipes(),
-            PacosStorage.getAllNotes()
+            PacosStorage.getAllNotes(),
+            PacosStorage.getAllCardColors()
         ]);
 
         const analisis = analizarFusionBibliotecas(
             copia,
             datosLocales[0],
-            datosLocales[1]
+            datosLocales[1],
+            datosLocales[2]
         );
 
 
@@ -1803,7 +1831,8 @@ async function leerBibliotecaParaFusionar(evento) {
 function analizarFusionBibliotecas(
     copia,
     recetasLocales,
-    notasLocales
+    notasLocales,
+    coloresLocales
 ) {
 
     const recetasLocalesPorId = new Map(
@@ -1831,6 +1860,20 @@ function analizarFusionBibliotecas(
                 return [nota.recipeId, nota];
             }
         )
+    );
+
+    const coloresLocalesPorId = new Map(
+        coloresLocales.map(function (preferencia) {
+            return [preferencia.recipeId, preferencia];
+        })
+    );
+
+    const coloresEntrantes = copia.cardColors || [];
+
+    const coloresEntrantesPorId = new Map(
+        coloresEntrantes.map(function (preferencia) {
+            return [preferencia.recipeId, preferencia];
+        })
     );
 
     const nuevas = [];
@@ -1880,7 +1923,10 @@ function analizarFusionBibliotecas(
         conflictos,
         notasLocalesPorId,
         notasEntrantesPorId,
-        totalNotasEntrantes: copia.notes.length
+        coloresLocalesPorId,
+        coloresEntrantesPorId,
+        totalNotasEntrantes: copia.notes.length,
+        totalColoresEntrantes: coloresEntrantes.length
     };
 }
 
@@ -1918,6 +1964,11 @@ function mostrarResumenFusion(analisis) {
             analisis.totalNotasEntrantes,
             "nota en el archivo",
             "notas en el archivo"
+        ),
+        crearTextoRecuentoFusion(
+            analisis.totalColoresEntrantes,
+            "color personalizado en el archivo",
+            "colores personalizados en el archivo"
         )
     ].forEach(
         function (texto) {
@@ -1991,6 +2042,7 @@ function prepararDatosFusion(
 
     const recetas = [];
     const notas = [];
+    const cardColors = [];
 
 
     function añadirNotaSiCorresponde(
@@ -2027,12 +2079,49 @@ function prepararDatosFusion(
     }
 
 
+    function añadirColorSiCorresponde(
+        identificadorOriginal,
+        identificadorDestino,
+        conservarColorLocal
+    ) {
+
+        const colorEntrante =
+            analisis.coloresEntrantesPorId.get(
+                identificadorOriginal
+            );
+
+        if (!colorEntrante) {
+            return;
+        }
+
+        if (
+            conservarColorLocal &&
+            analisis.coloresLocalesPorId.has(
+                identificadorDestino
+            )
+        ) {
+            return;
+        }
+
+        cardColors.push({
+            ...colorEntrante,
+            recipeId: identificadorDestino
+        });
+    }
+
+
     analisis.nuevas.forEach(
         function (receta) {
 
             recetas.push(receta);
 
             añadirNotaSiCorresponde(
+                receta.id,
+                receta.id,
+                true
+            );
+
+            añadirColorSiCorresponde(
                 receta.id,
                 receta.id,
                 true
@@ -2045,6 +2134,12 @@ function prepararDatosFusion(
         function (receta) {
 
             añadirNotaSiCorresponde(
+                receta.id,
+                receta.id,
+                true
+            );
+
+            añadirColorSiCorresponde(
                 receta.id,
                 receta.id,
                 true
@@ -2071,6 +2166,12 @@ function prepararDatosFusion(
                     true
                 );
 
+                añadirColorSiCorresponde(
+                    conflicto.incoming.id,
+                    conflicto.incoming.id,
+                    true
+                );
+
                 return;
             }
 
@@ -2088,6 +2189,12 @@ function prepararDatosFusion(
                 nuevoId,
                 false
             );
+
+            añadirColorSiCorresponde(
+                conflicto.incoming.id,
+                nuevoId,
+                false
+            );
         }
     );
 
@@ -2095,6 +2202,7 @@ function prepararDatosFusion(
     return {
         recipes: recetas,
         notes: notas,
+        cardColors,
         report: {
             added:
                 analisis.nuevas.length +
@@ -2112,7 +2220,8 @@ function prepararDatosFusion(
                 politicaConflictos === "local"
                     ? analisis.conflictos.length
                     : 0,
-            notesAdded: notas.length
+            notesAdded: notas.length,
+            colorsAdded: cardColors.length
         }
     };
 }
@@ -2162,11 +2271,12 @@ async function confirmarFusionBibliotecas() {
         await crearYDescargarCopiaSeguridad();
 
         estado.textContent =
-            "Incorporando las recetas y las notas…";
+            "Incorporando las recetas, las notas y los colores…";
 
         await PacosStorage.mergeLibrary(
             datos.recipes,
-            datos.notes
+            datos.notes,
+            datos.cardColors
         );
 
 
@@ -2198,6 +2308,11 @@ async function confirmarFusionBibliotecas() {
                 informe.notesAdded,
                 "nota añadida",
                 "notas añadidas"
+            ) + "\n" +
+            crearTextoRecuentoFusion(
+                informe.colorsAdded,
+                "color personalizado añadido",
+                "colores personalizados añadidos"
             )
         );
 

@@ -18,10 +18,11 @@
 const PacosStorage = (function () {
 
     const DATABASE_NAME = "pacos-library";
-    const DATABASE_VERSION = 1;
+    const DATABASE_VERSION = 2;
 
     const RECIPES_STORE = "recipes";
     const NOTES_STORE = "notes";
+    const CARD_COLORS_STORE = "cardColors";
 
     let databasePromise = null;
 
@@ -107,6 +108,27 @@ const PacosStorage = (function () {
 
                         database.createObjectStore(
                             NOTES_STORE,
+                            {
+                                keyPath: "recipeId"
+                            }
+                        );
+                    }
+
+
+                    /*
+                       La versión 2 añade únicamente preferencias
+                       visuales. Las recetas y las notas existentes
+                       permanecen intactas durante la actualización.
+                    */
+
+                    if (
+                        !database.objectStoreNames.contains(
+                            CARD_COLORS_STORE
+                        )
+                    ) {
+
+                        database.createObjectStore(
+                            CARD_COLORS_STORE,
                             {
                                 keyPath: "recipeId"
                             }
@@ -319,14 +341,74 @@ const PacosStorage = (function () {
     }
 
 
+    /* -----------------------------------------------------
+       5. PREFERENCIAS DE COLOR DE LAS TARJETAS
+       ----------------------------------------------------- */
+
+    function getAllCardColors() {
+
+        return runRequest(
+            CARD_COLORS_STORE,
+            "readonly",
+            function (store) {
+                return store.getAll();
+            }
+        );
+    }
+
+
+    function getCardColor(recipeId) {
+
+        return runRequest(
+            CARD_COLORS_STORE,
+            "readonly",
+            function (store) {
+                return store.get(recipeId);
+            }
+        );
+    }
+
+
+    function setCardColor(
+        recipeId,
+        color
+    ) {
+
+        return runRequest(
+            CARD_COLORS_STORE,
+            "readwrite",
+            function (store) {
+
+                return store.put({
+                    recipeId,
+                    color
+                });
+            }
+        );
+    }
+
+
+    function removeCardColor(recipeId) {
+
+        return runRequest(
+            CARD_COLORS_STORE,
+            "readwrite",
+            function (store) {
+                return store.delete(recipeId);
+            }
+        );
+    }
+
+
 
 /* ---------------------------------------------------------
-   5. SUSTITUIR LA BIBLIOTECA COMPLETA
+   6. SUSTITUIR LA BIBLIOTECA COMPLETA
    --------------------------------------------------------- */
 
 async function replaceLibrary(
     recipes,
-    notes
+    notes,
+    cardColors = []
 ) {
 
     const database = await openDatabase();
@@ -344,7 +426,8 @@ async function replaceLibrary(
                     database.transaction(
                         [
                             RECIPES_STORE,
-                            NOTES_STORE
+                            NOTES_STORE,
+                            CARD_COLORS_STORE
                         ],
                         "readwrite"
                     );
@@ -367,16 +450,22 @@ async function replaceLibrary(
                     NOTES_STORE
                 );
 
+            const cardColorsStore =
+                transaction.objectStore(
+                    CARD_COLORS_STORE
+                );
+
 
             try {
 
                 /*
-                   Primero vaciamos ambos espacios dentro
+                   Primero vaciamos los tres espacios dentro
                    de la misma operación.
                 */
 
                 recipesStore.clear();
                 notesStore.clear();
+                cardColorsStore.clear();
 
 
                 /*
@@ -396,6 +485,14 @@ async function replaceLibrary(
                     function (note) {
 
                         notesStore.put(note);
+                    }
+                );
+
+
+                cardColors.forEach(
+                    function (cardColor) {
+
+                        cardColorsStore.put(cardColor);
                     }
                 );
 
@@ -441,12 +538,13 @@ async function replaceLibrary(
 
 
 /* ---------------------------------------------------------
-   6. FUSIONAR DATOS SIN VACIAR LA BIBLIOTECA
+   7. FUSIONAR DATOS SIN VACIAR LA BIBLIOTECA
    --------------------------------------------------------- */
 
 async function mergeLibrary(
     recipes,
-    notes
+    notes,
+    cardColors = []
 ) {
 
     const database = await openDatabase();
@@ -464,7 +562,8 @@ async function mergeLibrary(
                     database.transaction(
                         [
                             RECIPES_STORE,
-                            NOTES_STORE
+                            NOTES_STORE,
+                            CARD_COLORS_STORE
                         ],
                         "readwrite"
                     );
@@ -485,6 +584,11 @@ async function mergeLibrary(
             const notesStore =
                 transaction.objectStore(
                     NOTES_STORE
+                );
+
+            const cardColorsStore =
+                transaction.objectStore(
+                    CARD_COLORS_STORE
                 );
 
 
@@ -509,6 +613,14 @@ async function mergeLibrary(
                     function (note) {
 
                         notesStore.put(note);
+                    }
+                );
+
+
+                cardColors.forEach(
+                    function (cardColor) {
+
+                        cardColorsStore.put(cardColor);
                     }
                 );
 
@@ -554,7 +666,7 @@ async function mergeLibrary(
 
 
 /* ---------------------------------------------------------
-   7. ELIMINAR UNA RECETA Y SUS DATOS ASOCIADOS
+   8. ELIMINAR UNA RECETA Y SUS DATOS ASOCIADOS
    --------------------------------------------------------- */
 
 async function deleteRecipeAndNotes(recipeId) {
@@ -574,7 +686,8 @@ async function deleteRecipeAndNotes(recipeId) {
                     database.transaction(
                         [
                             RECIPES_STORE,
-                            NOTES_STORE
+                            NOTES_STORE,
+                            CARD_COLORS_STORE
                         ],
                         "readwrite"
                     );
@@ -597,11 +710,17 @@ async function deleteRecipeAndNotes(recipeId) {
                     NOTES_STORE
                 );
 
+            const cardColorsStore =
+                transaction.objectStore(
+                    CARD_COLORS_STORE
+                );
+
 
             try {
 
                 recipesStore.delete(recipeId);
                 notesStore.delete(recipeId);
+                cardColorsStore.delete(recipeId);
 
 
             } catch (error) {
@@ -643,7 +762,7 @@ async function deleteRecipeAndNotes(recipeId) {
 }
 
     /* -----------------------------------------------------
-       5. SOLICITAR AL NAVEGADOR ALMACENAMIENTO PERSISTENTE
+       9. SOLICITAR AL NAVEGADOR ALMACENAMIENTO PERSISTENTE
        ----------------------------------------------------- */
 
     async function requestPersistence() {
@@ -661,7 +780,7 @@ async function deleteRecipeAndNotes(recipeId) {
 
 
     /* -----------------------------------------------------
-       6. API DISPONIBLE PARA LOS DEMÁS ARCHIVOS
+       10. API DISPONIBLE PARA LOS DEMÁS ARCHIVOS
        ----------------------------------------------------- */
 
     return Object.freeze({
@@ -672,6 +791,10 @@ async function deleteRecipeAndNotes(recipeId) {
         getRecipe,
         getAllRecipes,
 		getAllNotes,
+		getAllCardColors,
+		getCardColor,
+		setCardColor,
+		removeCardColor,
 		replaceLibrary,
 		mergeLibrary,
 		deleteRecipeAndNotes,

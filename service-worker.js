@@ -8,12 +8,12 @@
 
 
 const CACHE_PREFIX = "pacos-static-";
-const STATIC_CACHE = CACHE_PREFIX + "v10-1";
+const STATIC_CACHE = CACHE_PREFIX + "v11-1";
 
 
 /*
    Esta lista contiene únicamente la aplicación.
-   Las recetas y las notas permanecen en IndexedDB
+   Las recetas, las notas y los colores permanecen en IndexedDB
    y nunca se copian ni se eliminan desde este archivo.
 */
 
@@ -24,13 +24,14 @@ const CORE_ASSETS = [
     "./recipe.html",
     "./editor.html",
     "./faq.html",
-    "./styles.css?v=10-1",
-    "./storage.js?v=10-1",
-    "./recipe-validator.js?v=9-1",
-    "./app.js?v=10-1",
+    "./styles.css?v=11-1",
+    "./card-colors.js?v=11-1",
+    "./storage.js?v=11-1",
+    "./recipe-validator.js?v=11-1",
+    "./app.js?v=11-1",
     "./categories.js?v=8-1",
     "./editor.js?v=9-1",
-    "./recipe-detail.js?v=9-1",
+    "./recipe-detail.js?v=11-1",
     "./pwa.js?v=8-1",
     "./manifest.webmanifest",
     "./assets/PacosWordmark.png",
