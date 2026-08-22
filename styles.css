@@ -2125,6 +2125,92 @@ select.editor-input {
 }
 
 
+/*
+   Una preferencia explícita prevalece sobre la alternancia.
+   Sin este atributo, las dos reglas anteriores siguen intactas.
+*/
+
+.library-recipe-card[data-card-color="burgundy"] {
+    background-color: #4D1023;
+}
+
+.library-recipe-card[data-card-color="burgundy"]::after {
+    background-color: #A94F32;
+}
+
+.library-recipe-card[data-card-color="plum"] {
+    background-color: #69294F;
+}
+
+.library-recipe-card[data-card-color="plum"]::after {
+    background-color: #B45C7F;
+}
+
+.library-recipe-card[data-card-color="brick"] {
+    background-color: #8E332B;
+}
+
+.library-recipe-card[data-card-color="brick"]::after {
+    background-color: #D16A46;
+}
+
+.library-recipe-card[data-card-color="terracotta"] {
+    background-color: #A94F32;
+}
+
+.library-recipe-card[data-card-color="terracotta"]::after {
+    background-color: #7A2636;
+}
+
+.library-recipe-card[data-card-color="ochre"] {
+    background-color: #82531F;
+}
+
+.library-recipe-card[data-card-color="ochre"]::after {
+    background-color: #C9823A;
+}
+
+.library-recipe-card[data-card-color="bottle-green"] {
+    background-color: #104D3A;
+}
+
+.library-recipe-card[data-card-color="bottle-green"]::after {
+    background-color: #2C8A6D;
+}
+
+.library-recipe-card[data-card-color="forest-green"] {
+    background-color: #296943;
+}
+
+.library-recipe-card[data-card-color="forest-green"]::after {
+    background-color: #6A9B60;
+}
+
+.library-recipe-card[data-card-color="dark-turquoise"] {
+    background-color: #176B70;
+}
+
+.library-recipe-card[data-card-color="dark-turquoise"]::after {
+    background-color: #43A0A1;
+}
+
+.library-recipe-card[data-card-color="medium-blue"] {
+    background-color: #315F91;
+}
+
+.library-recipe-card[data-card-color="medium-blue"]::after {
+    background-color: #678AB4;
+}
+
+.library-recipe-card[data-card-color="indigo"] {
+    background-color: #3A447E;
+}
+
+.library-recipe-card[data-card-color="indigo"]::after {
+    background-color: #7776B5;
+}
+
+
 
 /* =========================================================
    MENÚ DE OPCIONES DE LA RECETA
@@ -2206,6 +2292,177 @@ select.editor-input {
         rgba(196, 96, 69, 0.35);
 
     outline-offset: 1px;
+}
+
+
+/* =========================================================
+   SELECTOR DE COLOR DE TARJETA
+   ========================================================= */
+
+
+.card-color-group {
+    margin: 20px 0 0;
+    padding: 0;
+
+    border: 0;
+}
+
+.card-color-group legend {
+    margin-bottom: 10px;
+
+    color: var(--color-vino);
+
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.card-color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.card-color-option {
+    position: relative;
+
+    display: grid;
+    gap: 7px;
+    justify-items: center;
+
+    min-width: 0;
+    padding: 9px 5px;
+
+    color: var(--color-texto-suave);
+    background-color: var(--color-crema-claro);
+
+    border: 1px solid transparent;
+    border-radius: 13px;
+
+    cursor: pointer;
+}
+
+.card-color-option:hover {
+    border-color: var(--color-borde);
+}
+
+.card-color-option:has(input:checked) {
+    color: var(--color-vino);
+    border-color: var(--color-terracota);
+
+    box-shadow:
+        0 0 0 2px rgba(196, 96, 69, 0.13);
+}
+
+.card-color-option:has(input:focus-visible) {
+    outline: 3px solid rgba(196, 96, 69, 0.3);
+    outline-offset: 2px;
+}
+
+.card-color-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.card-color-swatch {
+    display: block;
+
+    width: 100%;
+    aspect-ratio: 1.65;
+
+    background-color: var(--swatch-color);
+
+    border: 2px solid rgba(255, 255, 255, 0.74);
+    border-radius: 9px;
+
+    box-shadow:
+        0 2px 7px rgba(48, 35, 31, 0.18);
+}
+
+.card-color-swatch-automatic {
+    background:
+        linear-gradient(
+            135deg,
+            var(--color-vino) 0 50%,
+            var(--color-vino-claro) 50% 100%
+        );
+}
+
+.card-color-option-automatic {
+    grid-template-columns: 68px 1fr;
+    align-items: center;
+    justify-items: start;
+
+    padding: 10px;
+}
+
+.card-color-option-automatic .card-color-swatch {
+    width: 68px;
+}
+
+.card-color-name {
+    min-width: 0;
+
+    font-size: 0.68rem;
+    font-weight: 750;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.card-color-option-automatic .card-color-name {
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.card-color-swatch[data-card-color="burgundy"] {
+    --swatch-color: #4D1023;
+}
+
+.card-color-swatch[data-card-color="plum"] {
+    --swatch-color: #69294F;
+}
+
+.card-color-swatch[data-card-color="brick"] {
+    --swatch-color: #8E332B;
+}
+
+.card-color-swatch[data-card-color="terracotta"] {
+    --swatch-color: #A94F32;
+}
+
+.card-color-swatch[data-card-color="ochre"] {
+    --swatch-color: #82531F;
+}
+
+.card-color-swatch[data-card-color="bottle-green"] {
+    --swatch-color: #104D3A;
+}
+
+.card-color-swatch[data-card-color="forest-green"] {
+    --swatch-color: #296943;
+}
+
+.card-color-swatch[data-card-color="dark-turquoise"] {
+    --swatch-color: #176B70;
+}
+
+.card-color-swatch[data-card-color="medium-blue"] {
+    --swatch-color: #315F91;
+}
+
+.card-color-swatch[data-card-color="indigo"] {
+    --swatch-color: #3A447E;
+}
+
+@media (max-width: 500px) {
+
+    .card-color-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 

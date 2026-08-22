@@ -405,7 +405,25 @@ const PacosRecipeValidator = (function () {
         errors
     ) {
 
-        allowedProperties.forEach(
+        validateProperties(
+            value,
+            allowedProperties,
+            allowedProperties,
+            name,
+            errors
+        );
+    }
+
+
+    function validateProperties(
+        value,
+        requiredProperties,
+        allowedProperties,
+        name,
+        errors
+    ) {
+
+        requiredProperties.forEach(
             function (property) {
 
                 if (
@@ -504,12 +522,17 @@ function validateBackup(backup) {
 
     const errors = [];
 
-    const backupProperties = [
+    const requiredBackupProperties = [
         "format",
         "schemaVersion",
         "exportedAt",
         "recipes",
         "notes"
+    ];
+
+    const allowedBackupProperties = [
+        ...requiredBackupProperties,
+        "cardColors"
     ];
 
 
@@ -524,9 +547,10 @@ function validateBackup(backup) {
     }
 
 
-    validateExactProperties(
+    validateProperties(
         backup,
-        backupProperties,
+        requiredBackupProperties,
+        allowedBackupProperties,
         "La copia de seguridad",
         errors
     );
@@ -661,6 +685,95 @@ function validateBackup(backup) {
 
                     errors.push(
                         `La nota ${position} pertenece a una receta que no está incluida en la copia.`
+                    );
+                }
+            }
+        );
+    }
+
+
+    const cardColors =
+        backup.cardColors === undefined
+            ? []
+            : backup.cardColors;
+
+
+    if (!Array.isArray(cardColors)) {
+
+        errors.push(
+            "La copia no contiene una lista válida de colores de tarjeta."
+        );
+
+
+    } else {
+
+        const colorRecipeIds = new Set();
+
+
+        cardColors.forEach(
+            function (cardColor, index) {
+
+                const position = index + 1;
+
+
+                if (!isPlainObject(cardColor)) {
+
+                    errors.push(
+                        `El color de tarjeta ${position} no es un objeto válido.`
+                    );
+
+                    return;
+                }
+
+
+                validateExactProperties(
+                    cardColor,
+                    ["recipeId", "color"],
+                    `El color de tarjeta ${position}`,
+                    errors
+                );
+
+
+                if (!isUuid(cardColor.recipeId)) {
+
+                    errors.push(
+                        `El color de tarjeta ${position} no contiene un identificador de receta válido.`
+                    );
+
+                    return;
+                }
+
+
+                if (colorRecipeIds.has(cardColor.recipeId)) {
+
+                    errors.push(
+                        `El color de tarjeta ${position} está repetido.`
+                    );
+
+                } else {
+
+                    colorRecipeIds.add(
+                        cardColor.recipeId
+                    );
+                }
+
+
+                if (!recipeIds.has(cardColor.recipeId)) {
+
+                    errors.push(
+                        `El color de tarjeta ${position} pertenece a una receta que no está incluida en la copia.`
+                    );
+                }
+
+
+                if (
+                    !PacosCardColors.isValidColor(
+                        cardColor.color
+                    )
+                ) {
+
+                    errors.push(
+                        `El color de tarjeta ${position} no pertenece a la paleta de Paco's.`
                     );
                 }
             }

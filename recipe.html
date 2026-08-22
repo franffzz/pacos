@@ -15,7 +15,7 @@
     <title>Receta — Paco's</title>
 
     <!-- Reutilizamos el mismo diseño general -->
-    <link rel="stylesheet" href="styles.css?v=10-1">
+    <link rel="stylesheet" href="styles.css?v=11-1">
 </head>
 
 <body>
@@ -80,6 +80,15 @@
         </a>
 
         <button
+            class="recipe-options-action"
+            type="button"
+            id="change-card-color-button"
+            hidden
+        >
+            Cambiar color de tarjeta
+        </button>
+
+        <button
             class="recipe-options-action recipe-options-danger"
             type="button"
             id="delete-recipe-button"
@@ -89,6 +98,67 @@
         </button>
         
     </div>
+
+    <dialog
+        class="import-dialog card-color-dialog"
+        id="card-color-dialog"
+        aria-labelledby="card-color-dialog-title"
+    >
+        <div class="import-dialog-content">
+            <header class="import-dialog-header">
+                <div>
+                    <h2
+                        class="import-dialog-title"
+                        id="card-color-dialog-title"
+                    >
+                        Color de la tarjeta
+                    </h2>
+
+                    <p class="import-dialog-description">
+                        Elige un color para esta receta o conserva
+                        la alternancia automática de Paco's.
+                    </p>
+                </div>
+
+                <button
+                    class="import-dialog-close"
+                    type="button"
+                    id="close-card-color-dialog-button"
+                    aria-label="Cerrar"
+                >
+                    ×
+                </button>
+            </header>
+
+            <form id="card-color-form">
+                <div id="card-color-options"></div>
+
+                <p
+                    class="import-status"
+                    id="card-color-status"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+                <div class="import-dialog-actions">
+                    <button
+                        class="secondary-button"
+                        type="button"
+                        id="cancel-card-color-button"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        class="primary-button"
+                        type="submit"
+                    >
+                        Guardar color
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
 
 </div>
 
@@ -146,8 +216,9 @@
 
 
     <!-- Funcionamiento específico de la ficha -->
-   <script src="storage.js?v=10-1"></script>
-	<script src="recipe-detail.js?v=9-1"></script>
+   <script src="card-colors.js?v=11-1"></script>
+   <script src="storage.js?v=11-1"></script>
+	<script src="recipe-detail.js?v=11-1"></script>
 	<script src="pwa.js?v=8-1"></script>
 
 </body>

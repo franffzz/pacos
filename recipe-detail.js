@@ -1368,6 +1368,248 @@ function crearNombreArchivoReceta(titulo) {
 
 
 /* =========================================================
+   COLOR OPCIONAL DE LA TARJETA
+   ========================================================= */
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    prepararSelectorColorTarjeta
+);
+
+
+async function prepararSelectorColorTarjeta() {
+
+    const parametros = new URLSearchParams(
+        window.location.search
+    );
+
+    const recipeId = parametros.get("id");
+
+    if (!recipeId) {
+        return;
+    }
+
+    const botonAbrir = document.getElementById(
+        "change-card-color-button"
+    );
+
+    const dialogo = document.getElementById(
+        "card-color-dialog"
+    );
+
+    const formulario = document.getElementById(
+        "card-color-form"
+    );
+
+    const cerrarDialogo = function () {
+        dialogo.close();
+        botonAbrir.focus();
+    };
+
+
+    try {
+
+        const receta = await PacosStorage.getRecipe(recipeId);
+
+        if (!receta) {
+            return;
+        }
+
+        botonAbrir.hidden = false;
+
+        botonAbrir.addEventListener(
+            "click",
+            async function () {
+
+                cerrarMenuOpcionesReceta(
+                    document.getElementById(
+                        "recipe-options-button"
+                    ),
+                    document.getElementById(
+                        "recipe-options-menu"
+                    )
+                );
+
+                const preferencia =
+                    await PacosStorage.getCardColor(recipeId);
+
+                construirOpcionesColorTarjeta(
+                    preferencia
+                        ? preferencia.color
+                        : PacosCardColors.AUTOMATIC
+                );
+
+                document.getElementById(
+                    "card-color-status"
+                ).textContent = "";
+
+                dialogo.showModal();
+            }
+        );
+
+        document.getElementById(
+            "close-card-color-dialog-button"
+        ).addEventListener("click", cerrarDialogo);
+
+        document.getElementById(
+            "cancel-card-color-button"
+        ).addEventListener("click", cerrarDialogo);
+
+        dialogo.addEventListener(
+            "click",
+            function (evento) {
+                if (evento.target === dialogo) {
+                    cerrarDialogo();
+                }
+            }
+        );
+
+        formulario.addEventListener(
+            "submit",
+            async function (evento) {
+
+                evento.preventDefault();
+
+                const seleccion = formulario.elements.cardColor.value;
+                const estado = document.getElementById(
+                    "card-color-status"
+                );
+                const botonGuardar = formulario.querySelector(
+                    'button[type="submit"]'
+                );
+
+                botonGuardar.disabled = true;
+                estado.textContent = "Guardando…";
+
+                try {
+
+                    if (
+                        seleccion ===
+                        PacosCardColors.AUTOMATIC
+                    ) {
+                        await PacosStorage.removeCardColor(recipeId);
+
+                    } else if (
+                        PacosCardColors.isValidColor(seleccion)
+                    ) {
+                        await PacosStorage.setCardColor(
+                            recipeId,
+                            seleccion
+                        );
+
+                    } else {
+                        throw new Error(
+                            "El color seleccionado no es válido."
+                        );
+                    }
+
+                    cerrarDialogo();
+
+                } catch (error) {
+
+                    console.error(
+                        "No se ha podido guardar el color:",
+                        error
+                    );
+
+                    estado.textContent =
+                        "No se ha podido guardar el color.";
+
+                } finally {
+                    botonGuardar.disabled = false;
+                }
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "No se ha podido preparar el selector de color:",
+            error
+        );
+    }
+}
+
+
+function construirOpcionesColorTarjeta(colorActual) {
+
+    const contenedor = document.getElementById(
+        "card-color-options"
+    );
+
+    contenedor.replaceChildren();
+
+    const automatico = crearOpcionColorTarjeta({
+        id: PacosCardColors.AUTOMATIC,
+        name: "Automático",
+        automatic: true
+    }, colorActual);
+
+    automatico.classList.add("card-color-option-automatic");
+    contenedor.appendChild(automatico);
+
+    [
+        ["warm", "Tonos cálidos"],
+        ["opposite", "Tonos opuestos"]
+    ].forEach(function (grupo) {
+
+        const seccion = document.createElement("fieldset");
+        seccion.className = "card-color-group";
+
+        const titulo = document.createElement("legend");
+        titulo.textContent = grupo[1];
+
+        const opciones = document.createElement("div");
+        opciones.className = "card-color-grid";
+
+        PacosCardColors.getColorsByGroup(grupo[0]).forEach(
+            function (color) {
+                opciones.appendChild(
+                    crearOpcionColorTarjeta(color, colorActual)
+                );
+            }
+        );
+
+        seccion.append(titulo, opciones);
+        contenedor.appendChild(seccion);
+    });
+}
+
+
+function crearOpcionColorTarjeta(color, colorActual) {
+
+    const etiqueta = document.createElement("label");
+    etiqueta.className = "card-color-option";
+
+    const campo = document.createElement("input");
+    campo.type = "radio";
+    campo.name = "cardColor";
+    campo.value = color.id;
+    campo.checked = color.id === colorActual;
+
+    const muestra = document.createElement("span");
+    muestra.className = "card-color-swatch";
+    muestra.setAttribute("aria-hidden", "true");
+
+    if (color.automatic) {
+        muestra.classList.add("card-color-swatch-automatic");
+    } else {
+        muestra.dataset.cardColor = color.id;
+    }
+
+    const nombre = document.createElement("span");
+    nombre.className = "card-color-name";
+    nombre.textContent = color.name;
+
+    etiqueta.append(campo, muestra, nombre);
+
+    return etiqueta;
+}
+
+
+
+/* =========================================================
    ELIMINAR UNA RECETA GUARDADA
    ========================================================= */
 
@@ -1457,7 +1699,8 @@ async function eliminarRecetaGuardada(receta) {
 
     const confirmar = window.confirm(
         `¿Quieres eliminar «${receta.title}»?\n\n` +
-        "También se eliminarán sus notas personales.\n\n" +
+        "También se eliminarán sus notas personales y " +
+        "su color de tarjeta.\n\n" +
         "Esta acción no se puede deshacer, salvo restaurando " +
         "una copia de seguridad."
     );
