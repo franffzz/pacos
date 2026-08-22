@@ -441,7 +441,120 @@ async function replaceLibrary(
 
 
 /* ---------------------------------------------------------
-   6. ELIMINAR UNA RECETA Y SUS DATOS ASOCIADOS
+   6. FUSIONAR DATOS SIN VACIAR LA BIBLIOTECA
+   --------------------------------------------------------- */
+
+async function mergeLibrary(
+    recipes,
+    notes
+) {
+
+    const database = await openDatabase();
+
+
+    return new Promise(
+        function (resolve, reject) {
+
+            let transaction;
+
+
+            try {
+
+                transaction =
+                    database.transaction(
+                        [
+                            RECIPES_STORE,
+                            NOTES_STORE
+                        ],
+                        "readwrite"
+                    );
+
+
+            } catch (error) {
+
+                reject(error);
+                return;
+            }
+
+
+            const recipesStore =
+                transaction.objectStore(
+                    RECIPES_STORE
+                );
+
+            const notesStore =
+                transaction.objectStore(
+                    NOTES_STORE
+                );
+
+
+            try {
+
+                /*
+                   Los conflictos ya han sido resueltos por
+                   la interfaz. put() permite aplicar todas
+                   las incorporaciones y sustituciones dentro
+                   de una única transacción, sin clear().
+                */
+
+                recipes.forEach(
+                    function (recipe) {
+
+                        recipesStore.put(recipe);
+                    }
+                );
+
+
+                notes.forEach(
+                    function (note) {
+
+                        notesStore.put(note);
+                    }
+                );
+
+
+            } catch (error) {
+
+                transaction.abort();
+                reject(error);
+                return;
+            }
+
+
+            transaction.oncomplete = function () {
+
+                resolve();
+            };
+
+
+            transaction.onerror = function () {
+
+                reject(
+                    transaction.error ||
+                    new Error(
+                        "No se han podido fusionar las bibliotecas."
+                    )
+                );
+            };
+
+
+            transaction.onabort = function () {
+
+                reject(
+                    transaction.error ||
+                    new Error(
+                        "La fusión se ha cancelado."
+                    )
+                );
+            };
+        }
+    );
+}
+
+
+
+/* ---------------------------------------------------------
+   7. ELIMINAR UNA RECETA Y SUS DATOS ASOCIADOS
    --------------------------------------------------------- */
 
 async function deleteRecipeAndNotes(recipeId) {
@@ -560,6 +673,7 @@ async function deleteRecipeAndNotes(recipeId) {
         getAllRecipes,
 		getAllNotes,
 		replaceLibrary,
+		mergeLibrary,
 		deleteRecipeAndNotes,
 		requestPersistence
     });
