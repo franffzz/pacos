@@ -1265,70 +1265,7 @@ async function descargarCopiaSeguridad() {
 
     try {
 
-        const resultados = await Promise.all([
-            PacosStorage.getAllRecipes(),
-            PacosStorage.getAllNotes()
-        ]);
-
-        const recetas = resultados[0];
-        const notas = resultados[1];
-
-
-        const copia = {
-
-            format: "pacos-backup",
-            schemaVersion: 1,
-
-            exportedAt:
-                new Date().toISOString(),
-
-            recipes: recetas,
-            notes: notas
-        };
-
-
-        const contenido = JSON.stringify(
-            copia,
-            null,
-            2
-        );
-
-        const archivo = new Blob(
-            [contenido],
-            {
-                type: "application/json"
-            }
-        );
-
-        const direccionTemporal =
-            URL.createObjectURL(archivo);
-
-        const descarga =
-            document.createElement("a");
-
-        descarga.href = direccionTemporal;
-
-        descarga.download =
-            crearNombreCopiaSeguridad();
-
-        descarga.hidden = true;
-
-
-        document.body.appendChild(descarga);
-
-        descarga.click();
-        descarga.remove();
-
-
-        window.setTimeout(
-            function () {
-
-                URL.revokeObjectURL(
-                    direccionTemporal
-                );
-            },
-            1000
-        );
+        await crearYDescargarCopiaSeguridad();
 
 
         cerrarMenuBiblioteca(
@@ -1356,6 +1293,68 @@ async function descargarCopiaSeguridad() {
         botonCopia.textContent =
             "Crear copia de seguridad";
     }
+}
+
+
+async function crearYDescargarCopiaSeguridad() {
+
+    const resultados = await Promise.all([
+        PacosStorage.getAllRecipes(),
+        PacosStorage.getAllNotes()
+    ]);
+
+    const copia = {
+
+        format: "pacos-backup",
+        schemaVersion: 1,
+
+        exportedAt:
+            new Date().toISOString(),
+
+        recipes: resultados[0],
+        notes: resultados[1]
+    };
+
+
+    const contenido = JSON.stringify(
+        copia,
+        null,
+        2
+    );
+
+    const archivo = new Blob(
+        [contenido],
+        {
+            type: "application/json"
+        }
+    );
+
+    const direccionTemporal =
+        URL.createObjectURL(archivo);
+
+    const descarga =
+        document.createElement("a");
+
+    descarga.href = direccionTemporal;
+    descarga.download = crearNombreCopiaSeguridad();
+    descarga.hidden = true;
+
+
+    document.body.appendChild(descarga);
+
+    descarga.click();
+    descarga.remove();
+
+
+    window.setTimeout(
+        function () {
+
+            URL.revokeObjectURL(
+                direccionTemporal
+            );
+        },
+        1000
+    );
 }
 
 
@@ -1575,4 +1574,654 @@ async function validarArchivoCopiaSeguridad(evento) {
             "No se ha podido leer la copia de seguridad."
         );
     }
+}
+
+
+
+/* =========================================================
+   FUSIONAR DOS BIBLIOTECAS
+   ========================================================= */
+
+
+let fusionBibliotecasPendiente = null;
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    prepararFusionBibliotecas
+);
+
+
+/* ---------------------------------------------------------
+   20. PREPARAR EL SELECTOR Y EL CUADRO DE FUSIÓN
+   --------------------------------------------------------- */
+
+function prepararFusionBibliotecas() {
+
+    const botonFusionar = document.getElementById(
+        "merge-library-button"
+    );
+
+    const selectorArchivo = document.getElementById(
+        "merge-library-file"
+    );
+
+    const dialogo = document.getElementById(
+        "merge-library-dialog"
+    );
+
+    const botonCerrar = document.getElementById(
+        "close-merge-library-button"
+    );
+
+    const botonCancelar = document.getElementById(
+        "cancel-merge-library-button"
+    );
+
+    const botonConfirmar = document.getElementById(
+        "confirm-merge-library-button"
+    );
+
+
+    botonFusionar.addEventListener(
+        "click",
+        function () {
+
+            const botonMenu = document.getElementById(
+                "library-options-button"
+            );
+
+            const menu = document.getElementById(
+                "library-options-menu"
+            );
+
+
+            cerrarMenuBiblioteca(
+                botonMenu,
+                menu
+            );
+
+            selectorArchivo.value = "";
+            selectorArchivo.click();
+        }
+    );
+
+
+    selectorArchivo.addEventListener(
+        "change",
+        leerBibliotecaParaFusionar
+    );
+
+
+    [botonCerrar, botonCancelar].forEach(
+        function (boton) {
+
+            boton.addEventListener(
+                "click",
+                function () {
+
+                    cerrarCuadroFusion(dialogo);
+                }
+            );
+        }
+    );
+
+
+    dialogo.addEventListener(
+        "click",
+        function (evento) {
+
+            if (evento.target === dialogo) {
+                cerrarCuadroFusion(dialogo);
+            }
+        }
+    );
+
+
+    botonConfirmar.addEventListener(
+        "click",
+        confirmarFusionBibliotecas
+    );
+}
+
+
+/* ---------------------------------------------------------
+   21. LEER, VALIDAR Y COMPARAR LAS BIBLIOTECAS
+   --------------------------------------------------------- */
+
+async function leerBibliotecaParaFusionar(evento) {
+
+    const archivo = evento.target.files[0];
+
+
+    if (!archivo) {
+        return;
+    }
+
+
+    try {
+
+        const contenido = await archivo.text();
+        let copia;
+
+
+        try {
+
+            copia = JSON.parse(contenido);
+
+        } catch (error) {
+
+            window.alert(
+                "El archivo seleccionado no contiene un JSON válido."
+            );
+
+            return;
+        }
+
+
+        const validacion =
+            PacosRecipeValidator.validateBackup(copia);
+
+
+        if (!validacion.valid) {
+
+            const erroresVisibles =
+                validacion.errors
+                    .slice(0, 5)
+                    .join("\n");
+
+            const erroresRestantes =
+                validacion.errors.length > 5
+                    ? (
+                        "\n\nY " +
+                        (validacion.errors.length - 5) +
+                        " errores más."
+                    )
+                    : "";
+
+
+            window.alert(
+                "Este archivo no es una copia válida de Paco's.\n\n" +
+                erroresVisibles +
+                erroresRestantes
+            );
+
+            return;
+        }
+
+
+        const datosLocales = await Promise.all([
+            PacosStorage.getAllRecipes(),
+            PacosStorage.getAllNotes()
+        ]);
+
+        const analisis = analizarFusionBibliotecas(
+            copia,
+            datosLocales[0],
+            datosLocales[1]
+        );
+
+
+        fusionBibliotecasPendiente = analisis;
+
+        mostrarResumenFusion(analisis);
+
+        document.querySelector(
+            'input[name="merge-conflict-policy"][value="both"]'
+        ).checked = true;
+
+        document.getElementById(
+            "merge-library-status"
+        ).textContent = "";
+
+        const botonConfirmar = document.getElementById(
+            "confirm-merge-library-button"
+        );
+
+        botonConfirmar.disabled = false;
+        botonConfirmar.textContent = "Fusionar";
+
+        document.getElementById(
+            "merge-library-dialog"
+        ).showModal();
+
+
+    } catch (error) {
+
+        console.error(
+            "No se ha podido analizar la biblioteca:",
+            error
+        );
+
+        window.alert(
+            "No se ha podido leer la copia de seguridad."
+        );
+    }
+}
+
+
+function analizarFusionBibliotecas(
+    copia,
+    recetasLocales,
+    notasLocales
+) {
+
+    const recetasLocalesPorId = new Map(
+        recetasLocales.map(
+            function (receta) {
+
+                return [receta.id, receta];
+            }
+        )
+    );
+
+    const notasLocalesPorId = new Map(
+        notasLocales.map(
+            function (nota) {
+
+                return [nota.recipeId, nota];
+            }
+        )
+    );
+
+    const notasEntrantesPorId = new Map(
+        copia.notes.map(
+            function (nota) {
+
+                return [nota.recipeId, nota];
+            }
+        )
+    );
+
+    const nuevas = [];
+    const identicas = [];
+    const conflictos = [];
+
+
+    copia.recipes.forEach(
+        function (recetaEntrante) {
+
+            const recetaLocal =
+                recetasLocalesPorId.get(
+                    recetaEntrante.id
+                );
+
+
+            if (!recetaLocal) {
+
+                nuevas.push(recetaEntrante);
+                return;
+            }
+
+
+            if (
+                PacosRecipeValidator.areRecipesIdentical(
+                    recetaLocal,
+                    recetaEntrante
+                )
+            ) {
+
+                identicas.push(recetaEntrante);
+
+            } else {
+
+                conflictos.push({
+                    local: recetaLocal,
+                    incoming: recetaEntrante
+                });
+            }
+        }
+    );
+
+
+    return {
+        nuevas,
+        identicas,
+        conflictos,
+        notasLocalesPorId,
+        notasEntrantesPorId,
+        totalNotasEntrantes: copia.notes.length
+    };
+}
+
+
+/* ---------------------------------------------------------
+   22. MOSTRAR EL RESULTADO DE LA COMPARACIÓN
+   --------------------------------------------------------- */
+
+function mostrarResumenFusion(analisis) {
+
+    const resumen = document.getElementById(
+        "merge-library-summary"
+    );
+
+    const lista = document.createElement("ul");
+
+
+    [
+        crearTextoRecuentoFusion(
+            analisis.nuevas.length,
+            "receta nueva",
+            "recetas nuevas"
+        ),
+        crearTextoRecuentoFusion(
+            analisis.identicas.length,
+            "receta idéntica",
+            "recetas idénticas"
+        ),
+        crearTextoRecuentoFusion(
+            analisis.conflictos.length,
+            "receta con cambios diferentes",
+            "recetas con cambios diferentes"
+        ),
+        crearTextoRecuentoFusion(
+            analisis.totalNotasEntrantes,
+            "nota en el archivo",
+            "notas en el archivo"
+        )
+    ].forEach(
+        function (texto) {
+
+            const elemento = document.createElement("li");
+            elemento.textContent = texto;
+            lista.appendChild(elemento);
+        }
+    );
+
+
+    resumen.replaceChildren(lista);
+
+
+    if (analisis.conflictos.length > 0) {
+
+        const detalles = document.createElement("details");
+        const titulo = document.createElement("summary");
+        const nombres = document.createElement("ul");
+
+        titulo.textContent = "Ver recetas en conflicto";
+
+
+        analisis.conflictos.forEach(
+            function (conflicto) {
+
+                const elemento = document.createElement("li");
+                elemento.textContent = conflicto.local.title;
+                nombres.appendChild(elemento);
+            }
+        );
+
+
+        detalles.append(
+            titulo,
+            nombres
+        );
+
+        resumen.appendChild(detalles);
+    }
+
+
+    document.getElementById(
+        "merge-conflict-options"
+    ).hidden = analisis.conflictos.length === 0;
+}
+
+
+function crearTextoRecuentoFusion(
+    cantidad,
+    singular,
+    plural
+) {
+
+    return (
+        cantidad === 1
+            ? `1 ${singular}`
+            : `${cantidad} ${plural}`
+    );
+}
+
+
+/* ---------------------------------------------------------
+   23. CONSTRUIR LOS DATOS QUE SE ESCRIBIRÁN
+   --------------------------------------------------------- */
+
+function prepararDatosFusion(
+    analisis,
+    politicaConflictos
+) {
+
+    const recetas = [];
+    const notas = [];
+
+
+    function añadirNotaSiCorresponde(
+        identificadorOriginal,
+        identificadorDestino,
+        conservarNotaLocal
+    ) {
+
+        const notaEntrante =
+            analisis.notasEntrantesPorId.get(
+                identificadorOriginal
+            );
+
+
+        if (!notaEntrante) {
+            return;
+        }
+
+
+        if (
+            conservarNotaLocal &&
+            analisis.notasLocalesPorId.has(
+                identificadorDestino
+            )
+        ) {
+            return;
+        }
+
+
+        notas.push({
+            ...notaEntrante,
+            recipeId: identificadorDestino
+        });
+    }
+
+
+    analisis.nuevas.forEach(
+        function (receta) {
+
+            recetas.push(receta);
+
+            añadirNotaSiCorresponde(
+                receta.id,
+                receta.id,
+                true
+            );
+        }
+    );
+
+
+    analisis.identicas.forEach(
+        function (receta) {
+
+            añadirNotaSiCorresponde(
+                receta.id,
+                receta.id,
+                true
+            );
+        }
+    );
+
+
+    analisis.conflictos.forEach(
+        function (conflicto) {
+
+            if (politicaConflictos === "local") {
+                return;
+            }
+
+
+            if (politicaConflictos === "incoming") {
+
+                recetas.push(conflicto.incoming);
+
+                añadirNotaSiCorresponde(
+                    conflicto.incoming.id,
+                    conflicto.incoming.id,
+                    true
+                );
+
+                return;
+            }
+
+
+            const nuevoId = crypto.randomUUID();
+
+            recetas.push({
+                ...conflicto.incoming,
+                id: nuevoId,
+                updatedAt: new Date().toISOString()
+            });
+
+            añadirNotaSiCorresponde(
+                conflicto.incoming.id,
+                nuevoId,
+                false
+            );
+        }
+    );
+
+
+    return {
+        recipes: recetas,
+        notes: notas,
+        report: {
+            added:
+                analisis.nuevas.length +
+                (
+                    politicaConflictos === "both"
+                        ? analisis.conflictos.length
+                        : 0
+                ),
+            replaced:
+                politicaConflictos === "incoming"
+                    ? analisis.conflictos.length
+                    : 0,
+            identical: analisis.identicas.length,
+            conflictsKept:
+                politicaConflictos === "local"
+                    ? analisis.conflictos.length
+                    : 0,
+            notesAdded: notas.length
+        }
+    };
+}
+
+
+/* ---------------------------------------------------------
+   24. CONFIRMAR Y EJECUTAR LA FUSIÓN
+   --------------------------------------------------------- */
+
+async function confirmarFusionBibliotecas() {
+
+    if (!fusionBibliotecasPendiente) {
+        return;
+    }
+
+
+    const boton = document.getElementById(
+        "confirm-merge-library-button"
+    );
+
+    const estado = document.getElementById(
+        "merge-library-status"
+    );
+
+    const opcionSeleccionada = document.querySelector(
+        'input[name="merge-conflict-policy"]:checked'
+    );
+
+    const politica = opcionSeleccionada
+        ? opcionSeleccionada.value
+        : "both";
+
+    const datos = prepararDatosFusion(
+        fusionBibliotecasPendiente,
+        politica
+    );
+
+
+    boton.disabled = true;
+    boton.textContent = "Fusionando…";
+    estado.textContent =
+        "Creando una copia de seguridad previa…";
+
+
+    try {
+
+        await crearYDescargarCopiaSeguridad();
+
+        estado.textContent =
+            "Incorporando las recetas y las notas…";
+
+        await PacosStorage.mergeLibrary(
+            datos.recipes,
+            datos.notes
+        );
+
+
+        const informe = datos.report;
+
+        window.alert(
+            "Las bibliotecas se han fusionado correctamente.\n\n" +
+            crearTextoRecuentoFusion(
+                informe.added,
+                "receta añadida",
+                "recetas añadidas"
+            ) + "\n" +
+            crearTextoRecuentoFusion(
+                informe.replaced,
+                "receta sustituida",
+                "recetas sustituidas"
+            ) + "\n" +
+            crearTextoRecuentoFusion(
+                informe.identical,
+                "receta idéntica omitida",
+                "recetas idénticas omitidas"
+            ) + "\n" +
+            crearTextoRecuentoFusion(
+                informe.conflictsKept,
+                "conflicto conservado localmente",
+                "conflictos conservados localmente"
+            ) + "\n" +
+            crearTextoRecuentoFusion(
+                informe.notesAdded,
+                "nota añadida",
+                "notas añadidas"
+            )
+        );
+
+        window.location.reload();
+
+
+    } catch (error) {
+
+        console.error(
+            "No se han podido fusionar las bibliotecas:",
+            error
+        );
+
+        estado.textContent =
+            "No se ha realizado la fusión. La biblioteca anterior se conserva.";
+
+        boton.disabled = false;
+        boton.textContent = "Fusionar";
+    }
+}
+
+
+function cerrarCuadroFusion(dialogo) {
+
+    dialogo.close();
+    fusionBibliotecasPendiente = null;
 }

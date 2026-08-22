@@ -14,7 +14,7 @@
     <title>Paco's — Mis recetas</title>
 
     <!-- Archivo que contendrá todo el diseño visual -->
-    <link rel="stylesheet" href="styles.css?v=9-1">
+    <link rel="stylesheet" href="styles.css?v=10-1">
 </head>
 
 <body>
@@ -77,6 +77,14 @@
     Restaurar copia de seguridad
 </button>
 
+<button
+    class="recipe-options-action"
+    type="button"
+    id="merge-library-button"
+>
+    Fusionar bibliotecas
+</button>
+
 <a
     class="recipe-options-action"
     href="faq.html"
@@ -87,6 +95,13 @@
 <input
     type="file"
     id="restore-backup-file"
+    accept=".json,application/json"
+    hidden
+>
+
+<input
+    type="file"
+    id="merge-library-file"
     accept=".json,application/json"
     hidden
 >
@@ -320,10 +335,141 @@
     </div>
 
 </dialog>
+
+<!-- CUADRO DE FUSIÓN DE BIBLIOTECAS -->
+<dialog
+    class="import-dialog"
+    id="merge-library-dialog"
+    aria-labelledby="merge-library-title"
+>
+
+    <div class="import-dialog-content">
+
+        <header class="import-dialog-header">
+
+            <div>
+
+                <h2
+                    class="import-dialog-title"
+                    id="merge-library-title"
+                >
+                    Fusionar bibliotecas
+                </h2>
+
+                <p class="import-dialog-description">
+                    Las recetas que ya tienes no se borrarán.
+                </p>
+
+            </div>
+
+            <button
+                class="import-dialog-close"
+                type="button"
+                id="close-merge-library-button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </header>
+
+
+        <div
+            class="merge-library-summary"
+            id="merge-library-summary"
+        ></div>
+
+
+        <fieldset
+            class="merge-conflict-options"
+            id="merge-conflict-options"
+        >
+
+            <legend>
+                Recetas con el mismo identificador y cambios distintos
+            </legend>
+
+            <label class="merge-conflict-option">
+                <input
+                    type="radio"
+                    name="merge-conflict-policy"
+                    value="both"
+                    checked
+                >
+                <span>
+                    <strong>Guardar ambas</strong>
+                    La receta entrante recibirá un identificador nuevo.
+                </span>
+            </label>
+
+            <label class="merge-conflict-option">
+                <input
+                    type="radio"
+                    name="merge-conflict-policy"
+                    value="local"
+                >
+                <span>
+                    <strong>Conservar mis recetas</strong>
+                    Se omitirán las versiones diferentes del archivo.
+                </span>
+            </label>
+
+            <label class="merge-conflict-option">
+                <input
+                    type="radio"
+                    name="merge-conflict-policy"
+                    value="incoming"
+                >
+                <span>
+                    <strong>Usar las recetas del archivo</strong>
+                    Sustituirán las versiones locales con el mismo identificador.
+                </span>
+            </label>
+
+        </fieldset>
+
+
+        <p class="merge-library-note">
+            Tus notas personales nunca se sobrescribirán. Antes de fusionar,
+            Paco's descargará una copia de seguridad de la biblioteca actual.
+        </p>
+
+
+        <p
+            class="import-status"
+            id="merge-library-status"
+            role="status"
+            aria-live="polite"
+        ></p>
+
+
+        <div class="import-dialog-actions">
+
+            <button
+                class="secondary-button"
+                type="button"
+                id="cancel-merge-library-button"
+            >
+                Cancelar
+            </button>
+
+            <button
+                class="primary-button"
+                type="button"
+                id="confirm-merge-library-button"
+            >
+                Fusionar
+            </button>
+
+        </div>
+
+    </div>
+
+</dialog>
     
-		<script src="storage.js?v=6-2"></script>
+		<script src="storage.js?v=10-1"></script>
 		<script src="recipe-validator.js?v=9-1"></script>
-		<script src="app.js?v=6-2"></script>
+		<script src="app.js?v=10-1"></script>
 		<script src="pwa.js?v=8-1"></script>
 
 </body>

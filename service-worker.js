@@ -8,7 +8,7 @@
 
 
 const CACHE_PREFIX = "pacos-static-";
-const STATIC_CACHE = CACHE_PREFIX + "v9-1";
+const STATIC_CACHE = CACHE_PREFIX + "v10-1";
 
 
 /*
@@ -24,10 +24,10 @@ const CORE_ASSETS = [
     "./recipe.html",
     "./editor.html",
     "./faq.html",
-    "./styles.css?v=9-1",
-    "./storage.js?v=6-2",
+    "./styles.css?v=10-1",
+    "./storage.js?v=10-1",
     "./recipe-validator.js?v=9-1",
-    "./app.js?v=6-2",
+    "./app.js?v=10-1",
     "./categories.js?v=8-1",
     "./editor.js?v=9-1",
     "./recipe-detail.js?v=9-1",
